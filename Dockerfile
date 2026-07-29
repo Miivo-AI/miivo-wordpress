@@ -1,6 +1,8 @@
-# UPDATED: Use the official image for PHP 8.2 with Apache
-# This will install the LATEST WordPress version compatible with PHP 8.2
-FROM wordpress:php8.2-apache
+# pinned to the 7.0.x line: patch/security releases still flow on redeploy,
+# but major/minor core bumps (and the "Database Update Required" screen they
+# trigger) only happen when this tag is bumped deliberately. after bumping,
+# visit /wp-admin/upgrade.php once to run the one-click db migration.
+FROM wordpress:7.0-php8.2-apache
 
 
 RUN apt-get update && apt-get install -y magic-wormhole
