@@ -15,6 +15,17 @@ COPY noindex.conf /etc/apache2/conf-available/noindex.conf
 COPY robots-staging.txt /opt/staging/robots.txt
 RUN a2enmod headers && a2enconf noindex
 
+# apache worker cap + timeouts sized for the render instance (perf.conf),
+# static /healthz target for the render health check (healthz.conf), and a
+# php execution ceiling. all outside /var/www/html because the disk shadows
+# the docroot. conf-enabled loads after mods-enabled, so perf.conf wins over
+# the stock mpm_prefork values.
+COPY perf.conf /etc/apache2/conf-available/perf.conf
+COPY healthz.conf /etc/apache2/conf-available/healthz.conf
+COPY healthz.txt /opt/healthz/healthz
+COPY php-perf.ini /usr/local/etc/php/conf.d/miivo-perf.ini
+RUN a2enconf perf healthz
+
 RUN usermod -s /bin/bash www-data
 RUN chown -R www-data:www-data /var/www
 
