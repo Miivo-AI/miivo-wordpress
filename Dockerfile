@@ -1,8 +1,11 @@
-# pinned to the 7.0.x line: patch/security releases still flow on redeploy,
-# but major/minor core bumps (and the "Database Update Required" screen they
-# trigger) only happen when this tag is bumped deliberately. after bumping,
-# visit /wp-admin/upgrade.php once to run the one-click db migration.
-FROM wordpress:7.0-php8.2-apache
+# pinned to the 7.1.x line. docker hub only rebuilds the newest wordpress
+# minor line, so once 7.2 ships this tag stops getting php/apache security
+# fixes and must be bumped (the 7.0 tag froze on php 8.2.33 and missed the
+# php2shell fix in 8.2.35). the render disk at /var/www/html keeps the
+# installed wordpress core, so a bump changes php/apache, not core; update
+# core from wp-admin, then visit /wp-admin/upgrade.php if it asks for a db
+# update.
+FROM wordpress:7.1-php8.2-apache
 
 
 RUN apt-get update && apt-get install -y magic-wormhole
