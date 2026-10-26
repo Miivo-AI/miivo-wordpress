@@ -29,6 +29,20 @@ COPY healthz.txt /opt/healthz/healthz
 COPY php-perf.ini /usr/local/etc/php/conf.d/miivo-perf.ini
 RUN a2enconf perf healthz
 
+# hardening after the 2026-09-05 wp2shell compromise: no php from uploads,
+# no xml-rpc (hardening.conf). wp-cli plus a read-only disk audit that runs
+# at boot and prints to the render logs (miivo-audit.sh), because the render
+# disk is only reachable from inside the container.
+COPY hardening.conf /etc/apache2/conf-available/hardening.conf
+RUN a2enconf hardening
+RUN curl -fsSL -o /usr/local/bin/wp https://github.com/wp-cli/wp-cli/releases/download/v2.12.0/wp-cli-2.12.0.phar \
+	&& echo "be928f6b8ca1e8dfb9d2f4b75a13aa4aee0896f8a9a0a1c45cd5d2c98605e6172e6d014dda2e27f88c98befc16c040cbb2bd1bfa121510ea5cdf5f6a30fe8832  /usr/local/bin/wp" | sha512sum -c - \
+	&& chmod +x /usr/local/bin/wp
+COPY miivo-audit.sh miivo-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/miivo-audit.sh /usr/local/bin/miivo-entrypoint.sh
+ENTRYPOINT ["miivo-entrypoint.sh"]
+CMD ["apache2-foreground"]
+
 RUN usermod -s /bin/bash www-data
 RUN chown -R www-data:www-data /var/www
 
