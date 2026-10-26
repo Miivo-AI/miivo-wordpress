@@ -1,14 +1,10 @@
 # pinned to the 7.1.x line. docker hub only rebuilds the newest wordpress
 # minor line, so once 7.2 ships this tag stops getting php/apache security
 # fixes and must be bumped (the 7.0 tag froze on php 8.2.33 and missed the
-# php2shell fix in 8.2.35). the render disk at /var/www/html keeps the
-# installed wordpress core, so a bump changes php/apache, not core; update
-# core from wp-admin, then visit /wp-admin/upgrade.php if it asks for a db
-# update.
+# php2shell fix in 8.2.35). a bump also updates wordpress core: on boot,
+# miivo-entrypoint.sh copies the image's core over the render disk when it
+# is newer and runs the db upgrade.
 FROM wordpress:7.1-php8.2-apache
-
-
-RUN apt-get update && apt-get install -y magic-wormhole
 
 # this host is a headless CMS backend for www.miivo.ai and must never be
 # indexed by search engines (see noindex.conf). the render disk mounted at
